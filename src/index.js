@@ -1,4 +1,7 @@
-const proxy = require("./shopify-graphql-proxy");
+const ApiVersion = require("./shopify-graphql-proxy").ApiVersion;
+const shopifyGraphQLProxy = require("./shopify-graphql-proxy").shopifyGraphQLProxy;
 
-export default proxy;
-export * from "./shopify-graphql-proxy";
+module.exports = {
+    ApiVersion,
+    shopifyGraphQLProxy
+}

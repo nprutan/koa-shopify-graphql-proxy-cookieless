@@ -58,5 +58,6 @@ const shopifyGraphQLProxy = (proxyOptions) => {
 async function noop() {}
 
 module.exports = {
-  ApiVersion
+  ApiVersion,
+  shopifyGraphQLProxy
 }
