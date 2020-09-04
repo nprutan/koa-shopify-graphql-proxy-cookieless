@@ -1,6 +1,6 @@
 {
   "name": "koa-shopify-graphql-proxy-cookieless",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A cookieless version of the koa-shopify-graphql-proxy package with minor chages",
   "main": "src/index.js",
   "scripts": {
@@ -31,6 +31,7 @@
   "dependencies": {
     "@shopify/network": "^1.5.0",
     "nonce": "^1.0.4",
-    "safe-compare": "^1.1.2"
+    "safe-compare": "^1.1.2",
+    "koa-better-http-proxy": "^0.2.4"
   }
 }
