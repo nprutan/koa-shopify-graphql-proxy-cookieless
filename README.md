@@ -38,14 +38,14 @@ router.post("/graphql", async (ctx, next) => {
   });
   ```
 
-  # NOTE:
-  You will need to use some kind of JWT verifcation mechanism along with AppBridge 
-  for this to work. The above example uses both of these packages:
+# NOTE:
+You will need to use some kind of JWT verifcation mechanism along with AppBridge 
+for this to work. The above example uses both of these packages:
 
-  https://www.npmjs.com/package/jsonwebtoken
+https://www.npmjs.com/package/jsonwebtoken
 
-  https://www.npmjs.com/package/shopify-jwt-auth-verify
+https://www.npmjs.com/package/shopify-jwt-auth-verify
 
-  # Please See This Tutorial On AppBridge
-  https://shopify.dev/tutorials/authenticate-your-app-using-session-tokens
+# Please See This Tutorial On AppBridge
+https://shopify.dev/tutorials/authenticate-your-app-using-session-tokens
 
