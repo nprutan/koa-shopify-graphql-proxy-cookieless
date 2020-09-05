@@ -8,7 +8,7 @@ I'm providing this package as a reference for using with Shopify's Next Gen JWT-
 
 # Important
 This is a near drop-in replacement for the official koa-shopify-graphql-proxy package, but make sure you don't 
-import graphQLProxy as default:
+import graphQLProxy as default, and use named imports instead:
 
 ```
 import { graphQLProxy, ApiVersion } from "koa-shopify-graphql-proxy-cookieless";
