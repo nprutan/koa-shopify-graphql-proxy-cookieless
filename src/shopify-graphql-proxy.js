@@ -1,62 +1,73 @@
-const proxy = require("koa-better-http-proxy");
-
-const PROXY_BASE_PATH = "/graphql";
-const GRAPHQL_PATH_PREFIX = "/admin/api";
+import { Shopify } from '@shopify/shopify-api';
 
 const ApiVersion = {
-  July19: "2019-07",
-  October19: "2019-10",
-  January20: "2020-01",
-  April20: "2020-04",
-  July20: "2020-07",
-  October20: "2020-10",
-  Unstable: "unstable",
-  Unversioned: "unversioned",
+  April19: '2019-04',
+  July19: '2019-07',
+  October19: '2019-10',
+  January20: '2020-01',
+  April20: '2020-04',
+  July20: '2020-07',
+  October20: '2020-10',
+  January21: '2021-01',
+  April21: '2021-04',
+  July21: '2021-07',
+  Unstable: 'unstable',
+  Unversioned: 'unversioned',
 };
 
-const shopifyGraphQLProxy = (proxyOptions) => {
-  return async function shopifyGraphQLProxyMiddleware(ctx, next) {
-    const shop = "shop" in proxyOptions ? proxyOptions.shop : null;
-    const accessToken =
-      "password" in proxyOptions ? proxyOptions.password : null;
-    const version = proxyOptions.version;
+const graphqlProxy = async (shopName, token, ctx) => {
+  let reqBodyString = '';
 
-    if (ctx.path !== PROXY_BASE_PATH || ctx.method !== "POST") {
-      await next();
-      return;
-    }
+  // eslint-disable-next-line promise/param-names
+  const promise = new Promise((resolve, _reject) => {
+    ctx.req.on('data', (chunk) => {
+      reqBodyString += chunk;
+    });
 
-    if (accessToken == null || shop == null) {
-      ctx.throw(403, "Unauthorized");
-      return;
-    }
+    ctx.req.on('end', async () => {
+      let reqBodyObject;
+      try {
+        reqBodyObject = JSON.parse(reqBodyString);
+      } catch (err) {
+        // we can just continue and attempt to pass the string
+      }
 
-    await proxy(shop, {
-      https: true,
-      parseReqBody: false,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": accessToken,
-      },
-      proxyReqOptDecorator(proxyReqOpts) {
-        delete proxyReqOpts.headers.cookie;
-        delete proxyReqOpts.headers.Cookie;
-        delete proxyReqOpts.headers['x-requested-with'];
-        return proxyReqOpts;
-      },
-      proxyReqPathResolver() {
-        return `https://${shop}/${GRAPHQL_PATH_PREFIX}/${version}/graphql.json`;
-      },
-    })(
-      ctx,
-      noop
-    );
-  };
+      let status = 200;
+      let body = '';
+
+      try {
+        const options = {
+          data: reqBodyObject ? reqBodyObject : reqBodyString,
+        };
+        const client = new Shopify.Clients.Graphql(shopName, token);
+        const response = await client.query(options);
+        body = response.body;
+      } catch (err) {
+        switch (err.constructor.name) {
+          case 'MissingRequiredArgument':
+            status = 400;
+            break;
+          case 'HttpResponseError':
+            status = err.code;
+            break;
+          case 'HttpThrottlingError':
+            status = 429;
+            break;
+          default:
+            status = 500;
+        }
+        body = err.message;
+      } finally {
+        ctx.res.statusCode = status;
+        ctx.res.end(JSON.stringify(body));
+      }
+      return resolve();
+    });
+  });
+  return promise;
 }
-
-async function noop() {}
 
 module.exports = {
   ApiVersion,
-  shopifyGraphQLProxy
+  graphqlProxy
 }

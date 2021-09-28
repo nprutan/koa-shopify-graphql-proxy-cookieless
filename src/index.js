@@ -1,7 +1,7 @@
 const ApiVersion = require("./shopify-graphql-proxy").ApiVersion;
-const graphQLProxy = require("./shopify-graphql-proxy").shopifyGraphQLProxy;
+const graphqlProxy = require("./shopify-graphql-proxy").graphqlProxy;
 
 module.exports = {
     ApiVersion,
-    graphQLProxy
+    graphqlProxy
 }
