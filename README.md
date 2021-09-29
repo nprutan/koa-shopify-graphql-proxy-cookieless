@@ -29,8 +29,13 @@ router.post(
     "/graphql",
     // verifyRequest({ returnHeader: true }),
     async (ctx, next) => {
-      // we are pulling the shop from the decoded JWT fields
-      // the shop will not be accessible if JWT is invalid
+      // We are pulling the shop from the decoded JWT fields
+      // The shop will not be accessible if JWT is invalid
+      // NOTE: You will need to use verifyJwtSessionToken from the 
+      // koa-shopify-auth-cookieless package
+      // If you do not choose to use this library, you can decode 
+      // the JWT with any other method you'd like, pulling the shop
+      // parameter, and also verifying exp
       const shop = await verifyJwtSessionToken(ctx, next, Shopify.Context);
       // retrieve your access token here
       const accessToken = "persistedAccessToken"; 
