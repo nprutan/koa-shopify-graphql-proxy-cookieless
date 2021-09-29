@@ -11,43 +11,56 @@ This is a near drop-in replacement for the official koa-shopify-graphql-proxy pa
 import graphQLProxy as default, and use named imports instead:
 
 ```
-import { graphQLProxy, ApiVersion } from "koa-shopify-graphql-proxy-cookieless";
+import { graphqlProxy, ApiVersion } from "koa-shopify-graphql-proxy-cookieless";
+```
 
+NOTE: ApiVersion is provided here as a convenience, but will probably be removed
+in later versions. You can get the ApiVersion enum from Shopify's Node Api package like this:
+
+```
+import Shopify, { ApiVersion } from '@shopify/shopify-api'; 
 ```
 
 # Example
 Here's the basic example:
+
 ```
-router.post("/graphql", async (ctx, next) => {
-    const bearer = ctx.request.header.authorization;
-    const secret = process.env.SHOPIFY_API_SECRET;
-    const valid = isVerified(bearer, secret);
-    if (valid) {
-      const token = bearer.split(" ")[1];
-      const decoded = jwt.decode(token);
-      const shop = new URL(decoded.dest).host;
-      const proxy = graphQLProxy({
-        shop: shop,
-        // You will need to persist your token
-        // somewhere like using AWS AppSync
-        password: accessToken
-        version: ApiVersion.July20,
-      });
-      await proxy(ctx, next);
+router.post(
+    "/graphql",
+    // verifyRequest({ returnHeader: true }),
+    async (ctx, next) => {
+      // we are pulling the shop from the decoded JWT fields
+      // the shop will not be accessible if JWT is invalid
+      const shop = await verifyJwtSessionToken(ctx, next, Shopify.Context);
+      // retrieve your access token here
+      const accessToken = "persistedAccessToken"; 
+      await graphqlProxy(shop, accessToken, ctx);
     }
-  });
-  ```
+  );
+```
+
+# IMPORTANT
+You will need to have initialized the Shopify Context beforehand like this:
+
+```
+Shopify.Context.initialize({
+  API_KEY: process.env.SHOPIFY_API_KEY,
+  API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
+  SCOPES: process.env.SCOPES.split(","),
+  HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
+  API_VERSION: ApiVersion.April21,
+  IS_EMBEDDED_APP: true,
+  // This should be replaced with your preferred storage strategy
+  // We are not using any session
+  SESSION_STORAGE: null
+});
+```
 
 # NOTE:
-You will need to use some kind of JWT verifcation mechanism along with AppBridge 
-for this to work. The above example uses both of these packages:
+This version is updated to use the Shopify Node Api package internally,
+and this has created a simpler and more streamlined usage of Shopify's
+own graphQl client.
 
-https://www.npmjs.com/package/jsonwebtoken
-
-https://www.npmjs.com/package/shopify-jwt-auth-verify
-
-# Please See This Tutorial On AppBridge
-https://shopify.dev/tutorials/authenticate-your-app-using-session-tokens
 
 # See Working Demo
 I've created a working demo based on the Shopify-CLI Node project.  
