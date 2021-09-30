@@ -30,7 +30,7 @@ router.post(
     // verifyRequest({ returnHeader: true }),
     async (ctx, next) => {
       // We are pulling the shop from the decoded JWT fields
-      // The shop will not be accessible if JWT is invalid
+      // The shop param will not be accessible if JWT is invalid
       // NOTE: You will need to use verifyJwtSessionToken from the 
       // koa-shopify-auth-cookieless package
       // If you do not choose to use this library, you can decode 
